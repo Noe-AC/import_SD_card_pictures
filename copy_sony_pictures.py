@@ -179,9 +179,13 @@ def copy_camera_pictures_to_computer(do_make_sure_SD_card_is_detected=1,
 			metadata      = exiftool.ExifToolHelper().get_metadata(source)
 			datetime      = metadata[0]['File:FileModifyDate']
 			date          = datetime[:10].replace(':','-')
+			time          = datetime[11:19]
+			H,M,S         = time.split(':') # cannot have ":" in a file name in macOS
+			datetime      = date+'_'+H+'h'+M+'m'+S+'s'
 			target_folder = 'transferred_pictures/'+date+'/MTS'
 			name          = source.split('/')[-1]
-			target        = target_folder+'/'+name
+			#target        = target_folder+'/'+name # the problem with this is that if two videos of the same day have the same numbering (e.g. 0000.MTS) then one will not be imported.
+			target        = target_folder+'/'+datetime+'.MTS'
 			make_path(path=target_folder)
 			if target in glob.glob(target_folder+'/*.MTS'):
 				string = f'{date}/{name} : File already exists. Skip.'
@@ -190,7 +194,8 @@ def copy_camera_pictures_to_computer(do_make_sure_SD_card_is_detected=1,
 			else:
 				string = f'{date}/{name} : File not there. Copy it.'
 				print(string)
-				shutil.copy2(source,target_folder)
+				#shutil.copy2(source,target_folder)
+				shutil.copy(source,target) # use this instead because we are renaming the MTS file
 
 	if do_create_pictures_previews:
 
