@@ -8,23 +8,6 @@ Goal:
 
 ################################################################################
 ################################################################################
-# Import librairies
-
-import sys
-import numpy as np
-import pandas as pd
-
-np.set_printoptions(linewidth=np.inf)
-#np.set_printoptions(precision=20)
-np.set_printoptions(precision=1)
-np.set_printoptions(threshold=sys.maxsize)
-pd.set_option('display.max_rows', 3000)
-pd.set_option('display.max_columns', 9)
-pd.set_option('max_colwidth', 20)
-pd.set_option('display.width', 1000)
-
-################################################################################
-################################################################################
 # Defining functions
 
 def make_path(path,verbose=False):
