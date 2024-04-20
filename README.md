@@ -3,7 +3,7 @@
 Noé Aubin-Cadot
 
 **Description:**
-Here is a Python script to import pictures and videos from a SD card to a computer. For now, it only imports the content of a SD card from Sony camera and the script was only tested on macOS. The two Python scripts are:
+Here is a Python script to import pictures and videos from a SD card to a computer. For now, it only imports the content of a SD card from Sony camera and the script was only tested on macOS.
 
 **Log:**
 - 2024-06-01: First release of the script `copy_sony_pictures.py`. It only imports the 'old' file structure.
