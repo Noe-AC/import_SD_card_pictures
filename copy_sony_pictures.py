@@ -10,9 +10,10 @@ Remark that there are two file structures:
 In the function to import the pictures there's a parameter to specify the file structure.
 By default it's set to 'auto' as it'll try to identify the file structure.
 
-Log:
+Changelog:
 - 2023-06-01: Implemented the import for the old file structure.
 - 2024-04-19: Implemented the import for the new file structure.
+- 2024-05-10: Added the import of MP4 video files.
 
 """
 
@@ -46,6 +47,7 @@ def copy_camera_pictures_to_computer(
     do_copy_JPG=1,
     do_copy_ARW=1,
     do_copy_MTS=1,
+    do_copy_MP4=1,
     do_create_pictures_previews=1,
     do_show_in_Finder=1,
     file_structure='auto', # can be either 'old' or 'new' or 'auto'
@@ -119,12 +121,11 @@ def copy_camera_pictures_to_computer(
 
     import glob
 
-    if do_copy_JPG|do_copy_ARW:
-        # Take a look at the list of pictures folders
-        source_folders_pictures = glob.glob(input_path+'/DCIM/*')
-        
-        # Import a library that'll read the pictures metadata
-        import exifread # pip install ExifRead
+    # Take a look at the list of pictures folders
+    source_folders_pictures = glob.glob(input_path+'/DCIM/*')
+    
+    # Import a library that'll read the pictures metadata
+    import exifread # pip install ExifRead
 
     if file_structure=='auto':
         # Identifying the file structure
@@ -257,6 +258,8 @@ def copy_camera_pictures_to_computer(
         import exiftool # pip install PyExifTool
         # Take a look at the list of MTS files
         source_MTSs = glob.glob(input_path+'/PRIVATE/AVCHD/BDMV/STREAM/*.MTS')
+        if len(source_MTSs)==0:
+            print('No MTS file to import...')
         for source in source_MTSs:
             metadata      = exiftool.ExifToolHelper().get_metadata(source)
             datetime      = metadata[0]['File:FileModifyDate']
@@ -279,6 +282,36 @@ def copy_camera_pictures_to_computer(
                 shutil.copy(source,target)
         print('Done with mts files...')
 
+    if do_copy_MP4:
+        # Copy MP4 files
+        print('\nAbout to copy MP4 files...')
+        # Import a library to read videos metadata
+        import exiftool # pip install PyExifTool
+        # Take a look at the list of MP4 files
+        source_MP4s = glob.glob(input_path+'/PRIVATE/M4ROOT/CLIP/*.MP4')
+        if len(source_MP4s)==0:
+            print('No MP4 file to import...')
+        for source in source_MP4s:
+            metadata      = exiftool.ExifToolHelper().get_metadata(source)
+            datetime      = metadata[0]['File:FileModifyDate']
+            date          = datetime[:10].replace(':','-')
+            time          = datetime[11:19]
+            H,M,S         = time.split(':') # cannot have ":" in a file name in macOS
+            datetime      = date+'_'+H+'h'+M+'m'+S+'s'
+            target_folder = 'transferred_pictures/'+date+'/MP4'
+            name          = source.split('/')[-1]
+            #target        = target_folder+'/'+name # the problem with this is that if two videos of the same day have the same numbering (e.g. 0000.MTS) then one will not be imported.
+            target        = target_folder+'/'+datetime+'.MP4'
+            make_path(path=target_folder)
+            if target in glob.glob(target_folder+'/*.MP4'):
+                string = f'{date}/{name} : File already exists. Skip.'
+                print(string)
+                continue
+            else:
+                string = f'{date}/{name} : File not there. Copy it.'
+                print(string)
+                shutil.copy(source,target)
+        print('Done with MP4 files...')
 
     if do_create_pictures_previews:
 
